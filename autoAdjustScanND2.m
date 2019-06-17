@@ -30,7 +30,7 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
     binsize = p.Results.binSize;
     
     %Check that scan is evenly divisible into bins. If not, set new binsize
-    if ~isinteger((scanSize(1) * scanSize(2)) / (binsize(1) * binsize(2)))
+    if ~mod((scanSize(1) * scanSize(2)) / (binsize(1) * binsize(2)), 1) == 0
         dimX = 2:scanSize(1);
         dimY = 2:scanSize(2);
         binsizeX = min(dimX(rem(scanSize(1), dimX)==0));
