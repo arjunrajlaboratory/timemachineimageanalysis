@@ -10,6 +10,7 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
     p.addParameter('inDir', '', @ischar);
     p.addParameter('outDir', '', @ischar);
     p.addParameter('binSize', [3,3], @(x)validateattributes(x,{'numeric'}, {'size',[1 2]}));
+    p.addParameter('scaleFactor', 2, @isnumeric);
     
     p.parse(scanSize, wavelength, varargin{:});
 
@@ -28,9 +29,10 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
     scanSize = p.Results.scanSize;
     wavelength = p.Results.wavelength;
     binsize = p.Results.binSize;
+    scaleFactor = p.Results.scaleFactor;
     
     %Check that scan is evenly divisible into bins. If not, set new binsize
-    if ~isinteger((scanSize(1) * scanSize(2)) / (binsize(1) * binsize(2)))
+    if ~mod((scanSize(1) * scanSize(2)) / (binsize(1) * binsize(2)), 1) == 0
         dimX = 2:scanSize(1);
         dimY = 2:scanSize(2);
         binsizeX = min(dimX(rem(scanSize(1), dimX)==0));
@@ -58,7 +60,6 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
     
 
     % Read scan file, contrast planes, and tile planes
-    inDir = 'scan/';
     scanFile = dir(fullfile(inDir, '*.nd2'));
     scanFile = scanFile.name;
     reader = bfGetReader(fullfile(inDir, scanFile));
@@ -79,7 +80,7 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
                 reader.setSeries(regionHolder{i}(frame)-1);
                 iPlane = reader.getIndex(0, wavelength - 1, 0) + 1;
                 tmpPlane  = bfGetPlane(reader, iPlane);
-                tmpPlane = scalePlane(tmpPlane, regionHolder{i}(frame));
+                tmpPlane = scalePlane(tmpPlane, regionHolder{i}(frame), scaleFactor);
                 tmpOutIm((iii-1) * dimensionY + 1:(iii * dimensionY), (ii-1) * dimensionX + 1:ii * dimensionX) = tmpPlane;
             end
         end
