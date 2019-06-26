@@ -1,5 +1,8 @@
 function spotTable = countSpotsNearNuclei(spotIm, dapiIm)
 
+minNucleusSize = 1000;
+donutRadius = 60;
+
 % Deal with spots
 h = -fspecial('log',20,2);
 
@@ -15,7 +18,7 @@ CC = bwconncomp(dp);
 rp = regionprops(CC);
 area = [rp.Area];
 
-idx = area > 1000; % Get rid of small stuff
+idx = area > minNucleusSize; % Get rid of small stuff
 
 CC2 = CC;
 CC2.NumObjects = sum(idx);
@@ -28,7 +31,7 @@ cellNumber = [];
 
 for i = 1:CC2.NumObjects
     tempbw = lab == i; % select the ith cell
-    tempbw = imdilate(tempbw,strel('disk',30)) - tempbw; % donut around ith cell
+    tempbw = imdilate(tempbw,strel('disk',donutRadius)) - tempbw; % donut around ith cell
     
     temprm = irm.*tempbw; % keep only spots in the donut
     tempSpots = filt(temprm==1)'; % keep signal intensities for the spots in the donut
