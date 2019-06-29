@@ -30,6 +30,6 @@ end
 
 % This will reveal the threshold. For this data, 50 seems reasonable
 % enough.
-histogram(allSpotsTable.spotIntensities);
+histogram(spotTable.spotIntensities);
 xlim([0 100])
 
