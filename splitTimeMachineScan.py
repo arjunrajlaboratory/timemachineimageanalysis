@@ -12,7 +12,7 @@ parser.add_argument("path", help = "Specify the path to the scan directory conta
 parser.add_argument("dimensions", help = "Specify the number of images in X and in Y", nargs = 2, type = int)
 parser.add_argument("regions", help = "Specify the number of regions in X and Y to split the scan into.", nargs = 2, type = int)
 parser.add_argument("-o", "--outPath", help = "Option to specify path to save output 'region' directories", type = str)
-parser.add_argument("-p", "--path", help = "Specify whether the tile numbering is horizontal snake, or not_snake. Default is snake", default = "snake", choices = ["snake", "not_snake"])
+parser.add_argument("-p", "--scanPath", help = "Specify whether the tile numbering is horizontal snake, or not_snake. Default is snake", default = "snake", choices = ["snake", "not_snake"])
 args = parser.parse_args()
 
 filenames = glob.glob("{}/*.nd2".format(args.path))
@@ -31,7 +31,7 @@ splitY = args.regions[1]
 
 scanArray = np.arange(0, (dimX * dimY)).reshape(dimX, dimY)
 
-if args.path == "snake":
+if args.scanPath == "snake":
 	scanArray[range(1,dimX,2),:] = np.fliplr(scanArray[range(1,dimX,2),:])
 
 splitDimensionX = int(np.ceil(np.true_divide(dimX, splitX)))

@@ -13,7 +13,7 @@ parser.add_argument("scanDimensions", help = "Specify the number of images in X 
 parser.add_argument("centerFrame", help = "Specify the tile to use as the center frame", nargs = 1, type = int)
 parser.add_argument("regionOfInterest", help = "Specify the dimensions for the ouput region", nargs = 2, type = int)
 parser.add_argument("-o", "--outPath", help = "Option to specify path to save output 'region' directories", type = str)
-parser.add_argument("-p", "--path", help = "Specify whether the tile numbering is horizontal snake, or not_snake. Default is snake", default = "snake", choices = ["snake", "not_snake"])
+parser.add_argument("-p", "--scanPath", help = "Specify whether the tile numbering is horizontal snake, or not_snake. Default is snake", default = "snake", choices = ["snake", "not_snake"])
 args = parser.parse_args()
 
 filenames = glob.glob("{}/*.nd2".format(args.path))
@@ -34,15 +34,13 @@ center = args.centerFrame[0]
  
 scanArray = np.arange(0, (dimX * dimY)).reshape(dimX, dimY)
 
+if args.scanPath == "snake":
+	scanArray[range(1,dimX,2),:] = np.fliplr(scanArray[range(1,dimX,2),:])
+
 centerX = int(np.where(scanArray == center)[0])
 centerY = int(np.where(scanArray == center)[1])
 
-if args.path == "snake":
-	scanArray[range(1,dimX,2),:] = np.fliplr(scanArray[range(1,dimX,2),:])
-
-outArray = np.arange(0, (areaX * areaY)).reshape(areaX, areaY)
-
-regionOfInterst = scanArray[centerX - areaX//2:centerX + areaX//2:, centerY - areaY//2:centerY + areaY//2:].flatten()
+regionOfInterst = scanArray[centerX - areaX//2:centerX + areaX//2, centerY - areaY//2:centerY + areaY//2].flatten()
 
 if args.outPath is not None:
 	outPath = args.outPath
