@@ -1,4 +1,4 @@
-#Script to generate barcode targetting probes with inverted ClampFISH adapters. 
+#
 
 import os, shutil 
 import regex as re
@@ -12,6 +12,7 @@ parser.add_argument("path", help = "Specify the path to the scan directory conta
 parser.add_argument("dimensions", help = "Specify the number of images in X and in Y", nargs = 2, type = int)
 parser.add_argument("regions", help = "Specify the number of regions in X and Y to split the scan into.", nargs = 2, type = int)
 parser.add_argument("-o", "--outPath", help = "Option to specify path to save output 'region' directories", type = str)
+parser.add_argument("-p", "--path", help = "Specify whether the tile numbering is horizontal snake, or not_snake. Default is snake", default = "snake", choices = ["snake", "not_snake"])
 args = parser.parse_args()
 
 filenames = glob.glob("{}/*.nd2".format(args.path))
@@ -28,7 +29,10 @@ dimY = args.dimensions[1]
 splitX = args.regions[0]
 splitY = args.regions[1]
 
-scanArray = np.arange(1, (dimX * dimY) + 1).reshape(dimX, dimY)
+scanArray = np.arange(0, (dimX * dimY)).reshape(dimX, dimY)
+
+if args.path == "snake":
+	scanArray[range(1,dimX,2),:] = np.fliplr(scanArray[range(1,dimX,2),:])
 
 splitDimensionX = int(np.ceil(np.true_divide(dimX, splitX)))
 splitDimensionY = int(np.ceil(np.true_divide(dimY, splitY)))
@@ -49,6 +53,6 @@ for i, region in enumerate(regionHolder):
     if os.path.isdir(tmpOutDir) == False:
     	os.makedirs(tmpOutDir)
     for j in region:
-        shutil.copy2(filedict[j-1], tmpOutDir)
+        shutil.copy2(filedict[j], tmpOutDir)
     print "Finished region {}".format(i+1)
         
