@@ -54,7 +54,8 @@ function SS = analyzeTimeMachineScanND2(file, threshold, FISH_channel, DAPI_chan
 %    for i = 1:length(SS.fileNumber)
 %        SS.fileName(i) = string(dd(SS.fileNumber(i)).name);
 %    end
-    save(sprintf('spotCounts_w%d.mat', FISH_channel),'SS');
+    save(sprintf('allSpotsTable_w%d_threshold%d.mat', FISH_channel, threshold),'allSpotsTable');
+    save(sprintf('spotCounts_w%d_threshold%d.mat', FISH_channel, threshold),'SS');
 end
 
 

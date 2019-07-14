@@ -1,4 +1,4 @@
-function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
+function [] = autoAdjustScanND2(scanSize, wavelength, varargin)
 % Script to load images from scan, adjust contrast, stitch n x m tiles then save to new directory. 
 % Option to bin tiles into composite images. Needs to be updated to perform
 % better stitching. Requires that scan be divisible into n x m frames. 
@@ -11,9 +11,13 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
     p.addParameter('outDir', '', @ischar);
     p.addParameter('binSize', [3,3], @(x)validateattributes(x,{'numeric'}, {'size',[1 2]}));
     p.addParameter('scaleFactor', 2, @isnumeric);
+    p.addParameter('rank', 0, @(x)validateattributes(x,{'numeric'}, {'nonnegative'}));
+    p.addParameter('rankFile', 'spotCounts.mat', @ischar);
     
     p.parse(scanSize, wavelength, varargin{:});
-
+    
+    fileRank = p.Results.rank;
+    
     if ~isempty(p.Results.inDir)
        inDir = p.Results.inDir;
     else
@@ -43,21 +47,37 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
         binsize = binsize;  
     end
     
-    %Split the scan dimensions into regions based on binsize
+    %For testing
+%     scanSize = [90, 75];
+%     binsize = [2,3];
+    %Split the scan dimensions into regions based on binsize. Regions will
+    %be ordered by rank if specified in command. 
     scanMatrix = vec2mat(1:scanSize(1)*scanSize(2), scanSize(2));
     for i = 2:2:scanSize(1)
         scanMatrix(i, :) = fliplr(scanMatrix(i, :));
     end
-    regionHolder = cell(1, (scanSize(1) * scanSize(2)/(binsize(1) * binsize(2))));
-    splitX = (scanSize(1)/binsize(1));
-    splitY = (scanSize(2)/binsize(2));
-    for i = 1:splitX
-        for j = 1:splitY
-            regionN = ((i-1) * splitY) + j;
-            regionHolder{regionN} = reshape(scanMatrix(((i-1) * binsize(1)+1):(i * binsize(1)), ((j-1) * binsize(2)+1):(j * binsize(2))), 1, []);
+
+    if (fileRank > 0) && isfile(p.Results.rankFile)
+        load(p.Results.rankFile, 'SS')
+        rankList = table2array(SS(:,'fileNumber'));
+        regionHolder = cell(1, fileRank);
+        borderSize = idivide(uint16(binsize), 2, 'floor');
+        borderMod = double(mod(binsize,2) == 0);
+        for i = 1:fileRank
+            [row, col] = find(scanMatrix == rankList(i));
+            regionHolder{i} = reshape(scanMatrix(max(row-borderSize(1)+borderMod(1), 1):min(row + borderSize(1), scanSize(1)), max(col-borderSize(2)+borderMod(2), 1):min(col + borderSize(2), scanSize(2))), 1, []);
+        end
+    else
+        regionHolder = cell(1, (scanSize(1) * scanSize(2)/(binsize(1) * binsize(2))));
+        splitX = (scanSize(1)/binsize(1));
+        splitY = (scanSize(2)/binsize(2));
+        for i = 1:splitX
+            for j = 1:splitY
+                regionN = ((i-1) * splitY) + j;
+                regionHolder{regionN} = reshape(scanMatrix(((i-1) * binsize(1)+1):(i * binsize(1)), ((j-1) * binsize(2)+1):(j * binsize(2))), 1, []);
+            end
         end
     end
-    
 
     % Read scan file, contrast planes, and tile planes
     scanFile = dir(fullfile(inDir, '*.nd2'));
@@ -72,19 +92,26 @@ function [tmpOutIm] = autoAdjustScanND2(scanSize, wavelength, varargin)
         mkdir(outDir)
     end
     
-    for i = 1:length(regionHolder) % Loop through images
+    for i = 1:numel(regionHolder) % Loop through images
         tmpOutIm = zeros(binsize .* [dimensionY, dimensionX], 'uint8');  
         for ii = 1:binsize(2)
             for iii = 1:binsize(1)
                 frame = ((ii-1) * binsize(2)) + iii;
-                reader.setSeries(regionHolder{i}(frame)-1);
-                iPlane = reader.getIndex(0, wavelength - 1, 0) + 1;
-                tmpPlane  = bfGetPlane(reader, iPlane);
-                tmpPlane = scalePlane(tmpPlane, regionHolder{i}(frame), scaleFactor);
-                tmpOutIm((iii-1) * dimensionY + 1:(iii * dimensionY), (ii-1) * dimensionX + 1:ii * dimensionX) = tmpPlane;
+                if frame <= numel(regionHolder{i})
+                    reader.setSeries(regionHolder{i}(frame)-1);
+                    iPlane = reader.getIndex(0, wavelength - 1, 0) + 1;
+                    tmpPlane  = bfGetPlane(reader, iPlane);
+                    tmpPlane = scalePlane(tmpPlane, regionHolder{i}(frame), scaleFactor);
+                    tmpOutIm((iii-1) * dimensionY + 1:(iii * dimensionY), (ii-1) * dimensionX + 1:ii * dimensionX) = tmpPlane;
+                end
             end
         end
-        imwrite(tmpOutIm,fullfile(outDir, sprintf('contrastedImage_w%d_point%d.jpeg', wavelength, i)));
+        if fileRank > 0
+             imwrite(tmpOutIm,fullfile(outDir, sprintf('contrastedImage_w%d_point%d_rank%d.jpeg', wavelength, rankList(i), i)));
+        else
+             imwrite(tmpOutIm,fullfile(outDir, sprintf('contrastedImage_w%d_point%d.jpeg', wavelength, i)));
+        end
+        fprintf('Finished position %d of %d\n', i, numel(regionHolder));
     end
      
 %         tmpOutIm = zeros(binsize .* [dimensionY, dimensionX], 'uint8'); 
