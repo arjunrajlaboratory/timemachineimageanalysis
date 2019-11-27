@@ -4,7 +4,7 @@ function outIm = scalePlane(tmpIm, frameN, scaleFactor)
 
     quartiles = quantile(tmpIm,3);
 
-    im2 = imadjust(tmpIm,[quartiles(1) quartiles(3)*scaleFactor]);
+    im2 = imadjust(tmpIm,[max(0, quartiles(1)) min(quartiles(3)*scaleFactor, 1)]);
 
     im3 = imresize(im2,1);
     
