@@ -1,7 +1,28 @@
 function [] = autoAdjustScanND2(scanSize, wavelength, varargin)
-% Script to load images from scan, adjust contrast, stitch n x m tiles then save to new directory. 
-% Option to bin tiles into composite images. Needs to be updated to perform
-% better stitching. Requires that scan be divisible into n x m frames. 
+%   Script to load images from scan, adjust contrast, stitch n x m tiles then save to new directory. 
+%   Option to bin tiles into composite images. Requires that scan be
+%   divisible into n x m frames. Note, simply "sitches" images side by side, does not correct for overlap. 
+%
+%   Input Args (required):
+%   scanSize - Dimension of the scan. # images in X (across) * # of images in Y (up and down). 
+%   wavelength - Numeric value indicating which fluorescence channel to process.
+%
+%   Input Args (optional):
+%   inDir - Path to the directory containing the scan ND2 file. Default is working directory.  
+%   outDir - Name of directory to save the contrasted and stitched micrographs.
+%   binSize - The size (# of tiles in X and Y) for each output micrograph. Must be a factor of the scanSize. Default is 3x3 or smallest factor of the scanSize.   
+%   scaleFactor - Parameter for adjusting image contrast. Larger values increase the max intensity (micrographs look darker). See scalePlane.m for further details 
+%   rankFile - Seldom used legacy parameter for the path to a "rankFile". The analyzeTimeMachineScanND2.m function will try to automatically 
+%              rank images (tiles) by barcode RNA FISH signal (see analyzeTimeMachineScanND2.m script for details). 
+%              This ranking is saved to a file called something like spotCounts.mat (usually with a specified wavelength and spot intensity threshold). 
+%              If the rankFile and rank parameters are used, then this script will stitch tiles in the order specified in
+%              the rankFile, up to the specified rank. Ultimately, I have found it to ignore this parameter and just review     
+%              micrographs of the entire scan. 
+%   rank - Numeric value. See explanation of rankFile above. 
+%
+%   Example command:
+%   autoAdjustScanND2([40 40], 2, 'inDir', 'exampleData', 'outDir', 'contrasted', 'binSize', [2 2])
+%----------------------------------------------------------------
     p = inputParser;
     
     p.addRequired('scanSize', @(x)validateattributes(x,{'numeric'},{'size',[1 2]}));
@@ -11,8 +32,8 @@ function [] = autoAdjustScanND2(scanSize, wavelength, varargin)
     p.addParameter('outDir', '', @ischar);
     p.addParameter('binSize', [3,3], @(x)validateattributes(x,{'numeric'}, {'size',[1 2]}));
     p.addParameter('scaleFactor', 2, @isnumeric);
-    p.addParameter('rank', 0, @(x)validateattributes(x,{'numeric'}, {'nonnegative'}));
     p.addParameter('rankFile', 'spotCounts.mat', @ischar);
+    p.addParameter('rank', 0, @(x)validateattributes(x,{'numeric'}, {'nonnegative'}));
     
     p.parse(scanSize, wavelength, varargin{:});
     
@@ -114,24 +135,4 @@ function [] = autoAdjustScanND2(scanSize, wavelength, varargin)
         fprintf('Finished position %d of %d\n', i, numel(regionHolder));
     end
      
-%         tmpOutIm = zeros(binsize .* [dimensionY, dimensionX], 'uint8'); 
-%         for ii = 1:binsize(2)
-%             for iii = 1:binsize(1)
-%                 %test = ((ii-1) * binsize(1))
-%                 frame = ((ii-1) * binsize(2)) + iii;
-%                 reader.setSeries(regionHolder{100}(frame)-1);
-%                 iPlane = reader.getIndex(0, wavelength - 1, 0) + 1;
-%                 tmpPlane  = bfGetPlane(reader, iPlane);
-%                 tmpPlane = scalePlane(tmpPlane, regionHolder{100}(frame));
-%                 %(ii-1) * dimensionX
-%                 %(iii-1) * dimensionY
-%                 %size(tmpPlane)
-%                 %size(tmpOutIm((iii-1) * dimensionY + 1:(iii * dimensionY), (ii-1) * dimensionX + 1:ii * dimensionX));
-%                 %size(tmpPlane)
-%                 %frame
-%                 %regionHolder{100}(frame)
-%                 tmpOutIm((iii-1) * dimensionY + 1:(iii * dimensionY), (ii-1) * dimensionX + 1:ii * dimensionX) = tmpPlane;
-%             end
-%         end
-        %imwrite(tmpOutIm,fullfile(outDir, sprintf('contrastedImage_%s_%d.jpeg', channel, i)));
 end
