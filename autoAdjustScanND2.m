@@ -9,9 +9,10 @@ function [] = autoAdjustScanND2(scanSize, wavelength, varargin)
 %
 %   Input Args (optional):
 %   inDir - Path to the directory containing the scan ND2 file. Default is working directory.  
+%   inFile - Option to specify the scan file name. Default is to process all .nd2 files in inDir.  
 %   outDir - Name of directory to save the contrasted and stitched micrographs.
 %   binSize - The size (# of tiles in X and Y) for each output micrograph. Must be a factor of the scanSize. Default is 3x3 or smallest factor of the scanSize.   
-%   scaleFactor - Parameter for adjusting image contrast. Larger values increase the max intensity (micrographs look darker). See scalePlane.m for further details 
+%   scaleFactor - Parameter for adjusting image contrast. Larger values increase the max intensity (micrographs look darker). See scalePlane.m for further details. 
 %   rankFile - Seldom used legacy parameter for the path to a "rankFile". The analyzeTimeMachineScanND2.m function will try to automatically 
 %              rank images (tiles) by barcode RNA FISH signal (see analyzeTimeMachineScanND2.m script for details). 
 %              This ranking is saved to a file called something like spotCounts.mat (usually with a specified wavelength and spot intensity threshold). 
