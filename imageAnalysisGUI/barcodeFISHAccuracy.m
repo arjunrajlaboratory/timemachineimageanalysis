@@ -1,5 +1,5 @@
 %Script to analyze specificity/sensitivity of barcode HCR 09/14/2020
-inDir = '/Users/benjaminemert/Dropbox (RajLab)/Shared_Ben/timeMachine/rawdata/barcodeFISHvalidation/HCR/20200914_HCRtest_F8/well1_TM31topProbes';
+inDir = '/Users/benjaminemert/Dropbox (RajLab)/Papers/Rewind/rawdata/barcodeFISHvalidation/HCR/20200914_HCRtest_F8/well1_TM31topProbes';
 scanFile = 'scan/20200914_094422_253__Point0000_ChannelCY5,YFP,DAPI_Seq0000.nd2';
 if isfile(fullfile(inDir, 'S.mat')) 
     load(fullfile(inDir, 'S.mat'), 'S')
@@ -31,12 +31,17 @@ else
     save(fullfile(inDir, 'S.mat'), 'S', '-v7.3')
 end
 %% On a per-nucleus level, select all barcodeFISH positive cells
-S = gui_to_selectBarcodePositive_v2(S,[1200 1200], 1, 3);
+FOV = [1200 1200];
+barcodeFISHChannel = 1;
+dapiChannel = 3;
+S = gui_to_selectBarcodePositive_v2(S,FOV, barcodeFISHChannel, dapiChannel);
 %%
 save(fullfile(inDir, 'S.mat'), 'S', '-v7.3')
-
 %% Select GFP+ cells
-S = gui_to_selectGFPPositive_v2(S,[1200 1200], 2, 3);
+FOV = [1200 1200];
+GFPChannel = 2;
+dapiChannel = 3;
+S = gui_to_selectGFPPositive_v2(S,FOV, GFPChannel, dapiChannel);
 %%
 save(fullfile(inDir, 'S.mat'), 'S', '-v7.3')
 
