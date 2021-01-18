@@ -9,7 +9,7 @@ function [] = autoAdjustScanND2(scanSize, wavelength, varargin)
 %
 %   Input Args (optional):
 %   inDir - Path to the directory containing the scan ND2 file. Default is working directory.  
-%   inFile - Option to specify the scan file name. Default is to process all .nd2 files in inDir.  
+%   inFile - Option to specify the scan file name. Default is to process one .nd2 file in inDir. Note, if multiple .nd2 files in inDir, specify which .nd2 to process with inFile option.   
 %   outDir - Name of directory to save the contrasted and stitched micrographs.
 %   binSize - The size (# of tiles in X and Y) for each output micrograph. Must be a factor of the scanSize. Default is 3x3 or smallest factor of the scanSize.   
 %   scaleFactor - Parameter for adjusting image contrast. Larger values increase the max intensity (micrographs look darker). See scalePlane.m for further details. 
@@ -50,7 +50,7 @@ function [] = autoAdjustScanND2(scanSize, wavelength, varargin)
     if ~isempty(p.Results.outDir)
         outDir = p.Results.outDir;
     else
-        outDir = fullfile(inDir, 'renamed');
+        outDir = fullfile(inDir, 'contrasted');
     end
     
     scanSize = p.Results.scanSize;
