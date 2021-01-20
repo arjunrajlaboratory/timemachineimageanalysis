@@ -35,14 +35,14 @@ FOV = [1200 1200];
 barcodeFISHChannel = 1;
 dapiChannel = 3;
 S = gui_to_selectBarcodePositive_v2(S,FOV, barcodeFISHChannel, dapiChannel);
-%%
+
 save(fullfile(inDir, 'S.mat'), 'S', '-v7.3')
 %% Select GFP+ cells
 FOV = [1200 1200];
 GFPChannel = 2;
 dapiChannel = 3;
 S = gui_to_selectGFPPositive_v2(S,FOV, GFPChannel, dapiChannel);
-%%
+
 save(fullfile(inDir, 'S.mat'), 'S', '-v7.3')
 
 %%

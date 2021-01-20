@@ -179,7 +179,7 @@ function S = gui_to_selectBarcodePositive_v2(S, tileSize,channelCy, channelDAPI)
         uicontrol('Style', 'text', ...
             'Units', 'normalized', ...
             'Position', [instructions_start_x, instructions_start_y, instructions_width, instructions_height], ...
-            'FontSize', 26, ...
+            'FontSize', 16, ...
             'String', 'Click add to select barcode positive cells. Be sure to press Enter before moving to Next frame');
         
     end
@@ -189,7 +189,7 @@ function S = gui_to_selectBarcodePositive_v2(S, tileSize,channelCy, channelDAPI)
     % function to view the image:
     function view_image
         
-        border =  cat(2, [left_coords(frame),  top_coords(frame)], tileSize)
+        border =  cat(2, [left_coords(frame),  top_coords(frame)], tileSize);
 
         tmpPlaneCy  = imcrop(S.stitches{channelCy}, border);
         tmpPlaneCy = imadjust(im2double(tmpPlaneCy), [threshold_min, threshold_max]); 

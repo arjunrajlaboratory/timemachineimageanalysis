@@ -194,7 +194,7 @@ function S = gui_to_selectGFPPositive_v2(S, tileSize,channelGFP, channelDAPI)
         uicontrol('Style', 'text', ...
             'Units', 'normalized', ...
             'Position', [instructions_start_x, instructions_start_y, instructions_width, instructions_height], ...
-            'FontSize', 26, ...
+            'FontSize', 16, ...
             'String', 'Click add to select barcode positive cells. Be sure to press Enter before moving to Next frame');
         
     end
@@ -204,7 +204,7 @@ function S = gui_to_selectGFPPositive_v2(S, tileSize,channelGFP, channelDAPI)
     % function to view the image:
     function view_image
         
-        border =  cat(2, [left_coords(frame),  top_coords(frame)], tileSize)
+        border =  cat(2, [left_coords(frame),  top_coords(frame)], tileSize);
 
         tmpPlaneGFP  = imcrop(S.stitches{channelGFP}, border);
         tmpPlaneGFP = imadjust(im2double(tmpPlaneGFP), [threshold_min, threshold_max]); 
