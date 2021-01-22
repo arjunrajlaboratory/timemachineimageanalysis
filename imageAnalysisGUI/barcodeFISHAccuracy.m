@@ -45,7 +45,7 @@ S = gui_to_selectGFPPositive_v2(S,FOV, GFPChannel, dapiChannel);
 
 save(fullfile(inDir, 'S.mat'), 'S', '-v7.3')
 
-%%
+%% Extract cell coordinates and labels
 S.nuclei.tile = ones(1, numel(S.nuclei.coords));  
 temp_coords = cell2mat(S.nuclei.coords);
 for i = max(S.tiles):-1:1 %looping in reverse so that for nuclei in multiple tiles, only the first is kept
@@ -63,7 +63,7 @@ for i = max(S.tiles):-1:1 %looping in reverse so that for nuclei in multiple til
     S.nuclei.tile = temp_tiles; 
     
 end
-%%
+
 save(fullfile(inDir, 'S.mat'), 'S', '-v7.3')
 
 %% Export to CSV for further analysis in R
